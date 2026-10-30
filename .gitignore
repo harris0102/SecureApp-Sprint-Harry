@@ -1,0 +1,20 @@
+cat << 'EOF' > .gitignore
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C build files / compiled binaries
+*.o
+*.out
+app/c_extension/*.so
+
+# OS specific files
+.DS_Store
+EOF
