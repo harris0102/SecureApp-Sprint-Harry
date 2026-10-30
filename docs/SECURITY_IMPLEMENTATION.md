@@ -1,30 +1,37 @@
-# Security Implementation & Remediation Report
+# Security Implementation & Remediation
 
-This document outlines the vulnerability classes analyzed, their vulnerable code patterns, proof-of-concept exploit evidence, secure code fixes, and verification steps in compliance with CYC386 requirements.
+Each class is demonstrated in VULN_MODE and fixed in the default (secure) build.
+Evidence screenshots in evidence/screenshots/.
 
----
-
-## 1. Buffer Overflow (CWE-119 / CWE-120)
-* **Vulnerable Component:** Native C helper (`app/c_extension/bof_helper.c`) using unsafe `strcpy`.
-* **Exploit Evidence:** Passing 100 'A' characters triggers `*** stack smashing detected ***` and process termination when compiled with stack protection flags.
-* **Remedior / Fix:** Replaced `strcpy` with `snprintf(buffer, sizeof(buffer), "%s", input)` and enabled compiler defenses (`-fstack-protector-strong`, `-D_FORTIFY_SOURCE=2`).
+## 1. Buffer Overflow (CWE-120)
+- Component: native/bof_helper.c — vulnerable_process() uses strcpy() with no bounds check.
+- Exploit: ./native/bof_asan vuln "<200 A's>" -> AddressSanitizer stack-buffer-overflow (SS-01);
+  hardened build -> "*** stack smashing detected ***" (SS-02).
+- Fix: secure_process() uses snprintf() bounded to sizeof(buffer); compiled with
+  -fstack-protector-strong -D_FORTIFY_SOURCE=2 (ASLR + NX enabled by default).
+- Verify: ./native/bof_hardened secure "<200 A's>" processes input safely, no crash (SS-03).
 
 ## 2. Command Injection (CWE-78)
-* **Vulnerable Component:** Network diagnostic ping route (`app/routes.py`) using `shell=True` with user input.
-* **Exploit Evidence:** Appending `; whoami` to the target string executes arbitrary shell commands on the underlying Linux host.
-* **Remedior / Fix:** Avoid shell interpretation entirely by passing argument arrays to `subprocess.run([...])` or sanitizing inputs against strict allow-lists.
+- Component: /ping — VULN path calls subprocess with shell=True on user input.
+- Exploit: target "127.0.0.1; whoami" executes whoami, returns "harry" (SS-05).
+- Fix: allow-list regex ^[A-Za-z0-9.-]+$, then subprocess.run([...], shell=False).
+- Verify: same payload -> "Rejected…" (SS-09). Unit test: test_command_injection_blocked.
 
-## 3. IDOR (Insecure Direct Object Reference) (CWE-639)
-* **Vulnerable Component:** User profile endpoint (`/profile?id=1`) performing direct database lookup without session authorization.
-* **Exploit Evidence:** Modifying the `id` query parameter (`?id=2`) exposes confidential records of other users.
-* **Remedior / Fix:** Implemented strict object-level authorization verifying that the logged-in user owns or has permissions to access the requested resource ID.
+## 3. IDOR (CWE-639)
+- Component: /profile?id= — VULN path returns any record without ownership check.
+- Exploit: logged in as alice, /profile?id=2 reveals Bob's confidential record (SS-04).
+- Fix: require authentication; requested id must equal session user_id, else HTTP 403.
+- Verify: /profile?id=2 as alice -> 403 (SS-08). Unit test: test_idor_other_profile_blocked.
 
-## 4. CSRF (Cross-Site Request Forgery) (CWE-352)
-* **Vulnerable Component:** Fund transfer action (`/transfer_form`) lacking state validation tokens.
-* **Exploit Evidence:** External malicious sites can forge automated POST requests executing unauthorized transactions on behalf of an authenticated session.
-* **Remedior / Fix:** Implemented Synchronizer Token Pattern (cryptographic `csrf_token` checked on POST) combined with `SameSite=Strict` cookie policies.
+## 4. CSRF (CWE-352)
+- Component: /transfer — VULN path accepts a state-changing POST with no token.
+- Exploit: csrf_poc.html auto-submits a forged POST -> "Transferred $9999 to attacker" (SS-06).
+- Fix: per-session synchronizer token verified on POST; SameSite=Strict session cookie.
+- Verify: same PoC -> 403 (SS-10). Unit test: test_csrf_rejected_without_token.
 
-## 5. Clickjacking (UI Redressing) (CWE-1021)
-* **Vulnerable Component:** Web UI framing vulnerability where sensitive pages can be embedded into malicious external iframes.
-* **Exploit Evidence:** Invisible transparent overlays trick users into clicking underlying UI components.
-* **Remedior / Fix:** Configured `@app.after_request` to inject `X-Frame-Options: DENY` and Content Security Policy `frame-ancestors 'none'`.
+## 5. Clickjacking (CWE-1021)
+- Component: pages framable (no anti-framing header in VULN mode).
+- Exploit: /clickjacking embeds /transfer in an iframe that renders (SS-07).
+- Fix: after_request sets X-Frame-Options: DENY and CSP frame-ancestors 'none'.
+- Verify: iframe blocked; console shows "Refused to display … X-Frame-Options" (SS-11).
+  Unit test: test_clickjacking_header_present.

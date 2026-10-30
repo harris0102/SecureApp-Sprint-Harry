@@ -1,0 +1,136 @@
+{
+  "errors": [],
+  "generated_at": "2026-10-30T19:15:13Z",
+  "metrics": {
+    "./app.py": {
+      "CONFIDENCE.HIGH": 3,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 2,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 5,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 142,
+      "nosec": 0,
+      "skipped_tests": 1
+    },
+    "_totals": {
+      "CONFIDENCE.HIGH": 3,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 2,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 5,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 142,
+      "nosec": 0,
+      "skipped_tests": 1
+    }
+  },
+  "results": [
+    {
+      "code": "10 import secrets\n11 import subprocess\n12 from flask import Flask, request, session, redirect, abort, render_template_string\n",
+      "col_offset": 0,
+      "end_col_offset": 17,
+      "filename": "./app.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Consider possible security implications associated with the subprocess module.",
+      "line_number": 11,
+      "line_range": [
+        11
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess",
+      "test_id": "B404",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "25 USERS = {\n26     \"alice\": {\"id\": 1, \"password\": \"alicepw\", \"bio\": \"Alice CONFIDENTIAL: card ending 4417\"},\n27     \"bob\":   {\"id\": 2, \"password\": \"bobpw\",   \"bio\": \"Bob CONFIDENTIAL: card ending 9921\"},\n",
+      "col_offset": 23,
+      "end_col_offset": 33,
+      "filename": "./app.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: 'alicepw'",
+      "line_number": 26,
+      "line_range": [
+        26
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string"
+    },
+    {
+      "code": "26     \"alice\": {\"id\": 1, \"password\": \"alicepw\", \"bio\": \"Alice CONFIDENTIAL: card ending 4417\"},\n27     \"bob\":   {\"id\": 2, \"password\": \"bobpw\",   \"bio\": \"Bob CONFIDENTIAL: card ending 9921\"},\n28 }\n",
+      "col_offset": 23,
+      "end_col_offset": 33,
+      "filename": "./app.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: 'bobpw'",
+      "line_number": 27,
+      "line_range": [
+        27
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string"
+    },
+    {
+      "code": "133             else:\n134                 r = subprocess.run([\"ping\", \"-c\", \"1\", target],\n135                                    capture_output=True, text=True, timeout=4)\n136                 out = r.stdout or r.stderr\n",
+      "col_offset": 20,
+      "end_col_offset": 77,
+      "filename": "./app.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Starting a process with a partial executable path",
+      "line_number": 134,
+      "line_range": [
+        134,
+        135
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html",
+      "test_id": "B607",
+      "test_name": "start_process_with_partial_path"
+    },
+    {
+      "code": "133             else:\n134                 r = subprocess.run([\"ping\", \"-c\", \"1\", target],\n135                                    capture_output=True, text=True, timeout=4)\n136                 out = r.stdout or r.stderr\n",
+      "col_offset": 20,
+      "end_col_offset": 77,
+      "filename": "./app.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 134,
+      "line_range": [
+        134,
+        135
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
+    }
+  ]
+}
