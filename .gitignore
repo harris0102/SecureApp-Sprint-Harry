@@ -18,3 +18,7 @@ app/c_extension/*.so
 # OS specific files
 .DS_Store
 EOF
+
+# compiled C binaries
+native/bof_asan
+native/bof_hardened
